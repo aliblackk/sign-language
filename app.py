@@ -33,13 +33,14 @@ def extract_zip(uploaded_file):
 
         # Check if files are present in the extracted directory
         extracted_files = os.listdir(persistent_dir)
+        
+        # Display the result in Streamlit
         if len(extracted_files) > 0:
-            print(f"Successfully extracted the following files: {extracted_files}")
+            st.write(f"Successfully extracted the following files: {extracted_files}")
         else:
-            print("No files found in the extracted folder. Please check the ZIP file content.")
+            st.write("No files found in the extracted folder. Please check the ZIP file content.")
         
         return persistent_dir
-
 # Custom dataset to load images from extracted folder structure
 class ImageFolderDataset(Dataset):
     def __init__(self, root_dir, transform=None):
