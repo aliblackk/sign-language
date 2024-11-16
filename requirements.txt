@@ -1,0 +1,7 @@
+torch==2.1.0
+torchvision==0.15.0
+streamlit==1.18.0
+matplotlib==3.7.0
+seaborn==0.12.2
+scikit-learn==1.2.0
+Pillow==8.4.0
