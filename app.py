@@ -100,20 +100,25 @@ def evaluate_model(model, loader):
             all_labels.extend(target.cpu().numpy())
             all_preds.extend(predicted.cpu().numpy())
 
-    accuracy = correct_preds / total_preds
-    precision = precision_score(all_labels, all_preds, average='weighted', zero_division=0)
-    recall = recall_score(all_labels, all_preds, average='weighted', zero_division=0)
-    f1 = f1_score(all_labels, all_preds, average='weighted', zero_division=0)
-    cm = confusion_matrix(all_labels, all_preds)
+    # Check if total_preds is greater than 0 to avoid division by zero
+    if total_preds > 0:
+        accuracy = correct_preds / total_preds
+        precision = precision_score(all_labels, all_preds, average='weighted', zero_division=0)
+        recall = recall_score(all_labels, all_preds, average='weighted', zero_division=0)
+        f1 = f1_score(all_labels, all_preds, average='weighted', zero_division=0)
+        cm = confusion_matrix(all_labels, all_preds)
 
-    return {
-        "loss": total_loss / len(loader),
-        "accuracy": accuracy,
-        "precision": precision,
-        "recall": recall,
-        "f1": f1,
-        "confusion_matrix": cm,
-    }
+        return {
+            "loss": total_loss / len(loader),
+            "accuracy": accuracy,
+            "precision": precision,
+            "recall": recall,
+            "f1": f1,
+            "confusion_matrix": cm,
+        }
+    else:
+        st.write("No predictions were made. The dataset might be empty.")
+        return None
 
 # Custom dataset to load images from extracted folder structure
 class ImageFolderDataset(Dataset):
