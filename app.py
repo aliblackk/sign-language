@@ -107,7 +107,7 @@ class CustomCNN(nn.Module):
 # Load trained model
 def load_model():
     model = CustomCNN()  # Replace with your model class
-    model.load_state_dict(torch.load("final_trained_model.pth", map_location=torch.device("cpu")))
+    model.load_state_dict(torch.load("final_trained_model.pth", map_location=torch.device("cpu"), weights_only=True))
     model.eval()
     return model
 
