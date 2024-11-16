@@ -147,12 +147,20 @@ class ImageFolderDataset(Dataset):
         
         return image, label
 
-# Function to extract .zip file
+import shutil
+import tempfile
+import zipfile
+
 def extract_zip(uploaded_file):
+    # Create a temporary directory to extract the contents of the zip file
     with tempfile.TemporaryDirectory() as tmpdirname:
         with zipfile.ZipFile(uploaded_file, 'r') as zip_ref:
             zip_ref.extractall(tmpdirname)
-        return tmpdirname
+        # Use a local directory to store the extracted contents
+        persistent_dir = "./extracted_images"  # Directory in the current working directory
+        shutil.move(tmpdirname, persistent_dir)  # Move the extracted content to a permanent location
+        return persistent_dir
+
 
 # Streamlit app
 st.title("Sign Language Model Evaluation")
