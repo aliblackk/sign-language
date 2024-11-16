@@ -1,16 +1,78 @@
-import streamlit as st
+import gdown
+import zipfile
+import os
+import shutil
+import tempfile
 import torch
+import torch.nn as nn
+from torch.utils.data import DataLoader, Dataset
+from torchvision import transforms
+from PIL import Image
+import streamlit as st
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import confusion_matrix, precision_score, recall_score, f1_score
-import numpy as np
-from torch.utils.data import DataLoader
-from torchvision.transforms import transforms
-from PIL import Image
-import torch.nn as nn
-import gdown
-import os
 
+# Function to download the test dataset from Google Drive
+def download_test_dataset(test_url, test_filename):
+    if not os.path.exists(test_filename):
+        # Download the test dataset from Google Drive
+        gdown.download(test_url, test_filename, quiet=False)
+    else:
+        st.write(f"Test dataset file {test_filename} already exists.")
+
+# Function to extract the ZIP file (test dataset)
+def extract_zip(uploaded_file):
+    # Create a temporary directory to extract the contents of the zip file
+    with tempfile.TemporaryDirectory() as tmpdirname:
+        with zipfile.ZipFile(uploaded_file, 'r') as zip_ref:
+            zip_ref.extractall(tmpdirname)
+        # Use a local directory to store the extracted contents
+        persistent_dir = "./extracted_images"  # Directory in the current working directory
+        shutil.move(tmpdirname, persistent_dir)  # Move the extracted content to a permanent location
+        return persistent_dir
+
+# Custom dataset to load images from extracted folder structure
+class ImageFolderDataset(Dataset):
+    def __init__(self, root_dir, transform=None):
+        self.root_dir = root_dir
+        self.transform = transform
+        self.image_paths = []
+        self.labels = []
+        
+        # Iterate through the folders and collect images and their labels
+        for label, folder in enumerate(os.listdir(root_dir)):
+            folder_path = os.path.join(root_dir, folder)
+            if os.path.isdir(folder_path):
+                for image_name in os.listdir(folder_path):
+                    image_path = os.path.join(folder_path, image_name)
+                    if image_path.lower().endswith(('.png', '.jpg', '.jpeg')):
+                        self.image_paths.append(image_path)
+                        self.labels.append(label)
+        
+    def __len__(self):
+        return len(self.image_paths)
+
+    def __getitem__(self, idx):
+        image_path = self.image_paths[idx]
+        label = self.labels[idx]
+        
+        # Open and transform the image
+        image = Image.open(image_path).convert('RGB')
+        if self.transform:
+            image = self.transform(image)
+        
+        return image, label
+
+# Function to download the model from Google Drive
+def download_model(model_url, model_filename):
+    if not os.path.exists(model_filename):
+        # Download the model from Google Drive
+        gdown.download(model_url, model_filename, quiet=False)
+    else:
+        st.write(f"Model file {model_filename} already exists.")
+
+# Custom CNN model definition
 class CustomCNN(nn.Module):
     def __init__(self):
         super(CustomCNN, self).__init__()
@@ -36,29 +98,6 @@ class CustomCNN(nn.Module):
         x = self.dropout(x)  # Apply Dropout
         x = self.fc2(x)  # Final output layer
         return x
-
-import streamlit as st
-import torch
-import matplotlib.pyplot as plt
-import seaborn as sns
-from sklearn.metrics import confusion_matrix, precision_score, recall_score, f1_score
-import numpy as np
-from torch.utils.data import Dataset, DataLoader
-from torchvision import transforms
-from PIL import Image
-import torch.nn as nn
-import zipfile
-import os
-import tempfile
-import shutil
-
-# Function to download the model from Google Drive
-def download_model(model_url, model_filename):
-    if not os.path.exists(model_filename):
-        # Download the model from Google Drive
-        gdown.download(model_url, model_filename, quiet=False)
-    else:
-        st.write(f"Model file {model_filename} already exists.")
 
 # Load trained model
 def load_model():
@@ -100,72 +139,20 @@ def evaluate_model(model, loader):
             all_labels.extend(target.cpu().numpy())
             all_preds.extend(predicted.cpu().numpy())
 
-    # Check if total_preds is greater than 0 to avoid division by zero
-    if total_preds > 0:
-        accuracy = correct_preds / total_preds
-        precision = precision_score(all_labels, all_preds, average='weighted', zero_division=0)
-        recall = recall_score(all_labels, all_preds, average='weighted', zero_division=0)
-        f1 = f1_score(all_labels, all_preds, average='weighted', zero_division=0)
-        cm = confusion_matrix(all_labels, all_preds)
+    accuracy = correct_preds / total_preds
+    precision = precision_score(all_labels, all_preds, average='weighted', zero_division=0)
+    recall = recall_score(all_labels, all_preds, average='weighted', zero_division=0)
+    f1 = f1_score(all_labels, all_preds, average='weighted', zero_division=0)
+    cm = confusion_matrix(all_labels, all_preds)
 
-        return {
-            "loss": total_loss / len(loader),
-            "accuracy": accuracy,
-            "precision": precision,
-            "recall": recall,
-            "f1": f1,
-            "confusion_matrix": cm,
-        }
-    else:
-        st.write("No predictions were made. The dataset might be empty.")
-        return None
-
-# Custom dataset to load images from extracted folder structure
-class ImageFolderDataset(Dataset):
-    def __init__(self, root_dir, transform=None):
-        self.root_dir = root_dir
-        self.transform = transform
-        self.image_paths = []
-        self.labels = []
-        
-        # Iterate through the folders and collect images and their labels
-        for label, folder in enumerate(os.listdir(root_dir)):
-            folder_path = os.path.join(root_dir, folder)
-            if os.path.isdir(folder_path):
-                for image_name in os.listdir(folder_path):
-                    image_path = os.path.join(folder_path, image_name)
-                    if image_path.lower().endswith(('.png', '.jpg', '.jpeg')):
-                        self.image_paths.append(image_path)
-                        self.labels.append(label)
-        
-    def __len__(self):
-        return len(self.image_paths)
-
-    def __getitem__(self, idx):
-        image_path = self.image_paths[idx]
-        label = self.labels[idx]
-        
-        # Open and transform the image
-        image = Image.open(image_path).convert('RGB')
-        if self.transform:
-            image = self.transform(image)
-        
-        return image, label
-
-import shutil
-import tempfile
-import zipfile
-
-def extract_zip(uploaded_file):
-    # Create a temporary directory to extract the contents of the zip file
-    with tempfile.TemporaryDirectory() as tmpdirname:
-        with zipfile.ZipFile(uploaded_file, 'r') as zip_ref:
-            zip_ref.extractall(tmpdirname)
-        # Use a local directory to store the extracted contents
-        persistent_dir = "./extracted_images"  # Directory in the current working directory
-        shutil.move(tmpdirname, persistent_dir)  # Move the extracted content to a permanent location
-        return persistent_dir
-
+    return {
+        "loss": total_loss / len(loader),
+        "accuracy": accuracy,
+        "precision": precision,
+        "recall": recall,
+        "f1": f1,
+        "confusion_matrix": cm,
+    }
 
 # Streamlit app
 st.title("Sign Language Model Evaluation")
@@ -177,57 +164,43 @@ model_filename = "final_trained_model.pth"
 # Download the model from Google Drive
 download_model(model_url, model_filename)
 
-# Sidebar for file upload
-uploaded_file = st.sidebar.file_uploader("Upload Test Dataset (ZIP)", type=["zip"])
+# URL of the test dataset on Google Drive
+test_url = "https://drive.google.com/uc?id=1mFZ4VUHTdzzmd4zdO5TeiiWEStfK0FAD"  # Replace with the actual URL
+test_filename = "test.zip"
 
-if uploaded_file is not None:
-    # Extract ZIP file contents
-    temp_dir = extract_zip(uploaded_file)
-    st.write(f"Files extracted to: {temp_dir}")
-    
-    # Define transformations for the dataset (no resizing needed, images are 224x224)
-    transform = transforms.Compose([
-        transforms.ToTensor(),
-    ])
-    
-    # Create the dataset and DataLoader
-    dataset = ImageFolderDataset(root_dir=temp_dir, transform=transform)
-    test_loader = DataLoader(dataset, batch_size=32, shuffle=False)  # Adjust batch size as needed
+# Download the test dataset
+download_test_dataset(test_url, test_filename)
 
-    # Load model
-    model = load_model()
+# Extract ZIP file contents
+temp_dir = extract_zip(test_filename)
+st.write(f"Files extracted to: {temp_dir}")
 
-    # Evaluate model
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model.to(device)
-    results = evaluate_model(model, test_loader)
+# Define transformations for the dataset (no resizing needed, images are 224x224)
+transform = transforms.Compose([
+    transforms.ToTensor(),
+])
 
-    # Display metrics
-    st.subheader("Model Metrics")
-    st.write(f"Loss: {results['loss']:.4f}")
-    st.write(f"Accuracy: {results['accuracy']:.2%}")
-    st.write(f"Precision: {results['precision']:.2%}")
-    st.write(f"Recall: {results['recall']:.2%}")
-    st.write(f"F1 Score: {results['f1']:.2%}")
+# Create the dataset and DataLoader
+dataset = ImageFolderDataset(root_dir=temp_dir, transform=transform)
+test_loader = DataLoader(dataset, batch_size=32, shuffle=False)  # Adjust batch size as needed
 
-    # Display confusion matrix
-    st.subheader("Confusion Matrix")
-    class_names = [str(i) for i in range(26)]  # Assuming 26 classes (one per folder)
-    plot_confusion_matrix(results["confusion_matrix"], class_names)
+# Load model
+model = load_model()
 
-    # Option to test individual images
-    st.subheader("Test an Image")
-    uploaded_image = st.file_uploader("Upload an image", type=["png", "jpg", "jpeg"])
+# Evaluate model
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+model.to(device)
+results = evaluate_model(model, test_loader)
 
-    if uploaded_image is not None:
-        image = Image.open(uploaded_image)
-        st.image(image, caption="Uploaded Image", use_column_width=True)
+# Display metrics
+st.subheader("Model Metrics")
+st.write(f"Loss: {results['loss']:.4f}")
+st.write(f"Accuracy: {results['accuracy']:.2%}")
+st.write(f"Precision: {results['precision']:.2%}")
+st.write(f"Recall: {results['recall']:.2%}")
+st.write(f"F1 Score: {results['f1']:.2%}")
 
-        # Preprocess image
-        image_tensor = transform(image).unsqueeze(0).to(device)
-
-        # Predict
-        with torch.no_grad():
-            output = model(image_tensor)
-            _, predicted = output.max(1)
-            st.write(f"Predicted Class: {predicted.item()}")
+# Display confusion matrix
+st.subheader("Confusion Matrix")
+class_names = [str(i) for i in range(26)]  # Assuming 26 classes (one per folder)
+plot_confusion_matrix(results["confusion_matrix"], class_names)
