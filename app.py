@@ -35,8 +35,8 @@ def extract_zip(uploaded_file):
         extracted_files = os.listdir(persistent_dir)
         
         # Display the result in Streamlit
-        
-        return persistent_dir
+        return persistent_dir  # return the correct directory
+
 # Custom dataset to load images from extracted folder structure
 class ImageFolderDataset(Dataset):
     def __init__(self, root_dir, transform=None):
@@ -121,7 +121,7 @@ def plot_confusion_matrix(cm, class_names):
     st.pyplot(plt)
 
 # Evaluate the model on a dataset
-def evaluate_model(model, loader):
+def evaluate_model(model, loader, device):
     all_labels = []
     all_preds = []
 
@@ -132,7 +132,7 @@ def evaluate_model(model, loader):
 
     with torch.no_grad():
         for data, target in loader:
-            data, target = data.to(device), target.to(device)
+            data, target = data.to(device), target.to(device)  # Ensure data is on correct device
             output = model(data)
             loss = criterion(output, target)
             total_loss += loss.item()
@@ -181,39 +181,36 @@ download_test_dataset(test_url, test_filename)
 temp_dir = extract_zip(test_filename)
 st.write(f"Files extracted to: {temp_dir}")
 
-extracted_files = os.listdir(persistent_dir)
-
-if len(extracted_files) > 0:
-    st.write(f"Successfully extracted the following files: {extracted_files}")
-else:
-    st.write("No files found in the extracted folder. Please check the ZIP file content.")
-
-# Define transformations for the dataset (no resizing needed, images are 224x224)
+# Define transformations for the dataset
 transform = transforms.Compose([
+    transforms.Resize((224, 224)),  # Resize images if necessary
     transforms.ToTensor(),
 ])
 
 # Create the dataset and DataLoader
 dataset = ImageFolderDataset(root_dir=temp_dir, transform=transform)
+
+# Display the length of the test dataset
+dataset_length = len(dataset)
+st.write(f"Test dataset contains {dataset_length} images.")
+
 test_loader = DataLoader(dataset, batch_size=32, shuffle=False)  # Adjust batch size as needed
 
 # Load model
-model = load_model()
-
-# Evaluate model
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+model = load_model()
 model.to(device)
-results = evaluate_model(model, test_loader)
 
-# Display metrics
-st.subheader("Model Metrics")
-st.write(f"Loss: {results['loss']:.4f}")
-st.write(f"Accuracy: {results['accuracy']:.2%}")
-st.write(f"Precision: {results['precision']:.2%}")
-st.write(f"Recall: {results['recall']:.2%}")
-st.write(f"F1 Score: {results['f1']:.2%}")
+# Evaluate the model
+evaluation_results = evaluate_model(model, test_loader, device)
+
+# Display evaluation results in Streamlit
+st.write("Model Evaluation Results:")
+st.write(f"Loss: {evaluation_results['loss']:.4f}")
+st.write(f"Accuracy: {evaluation_results['accuracy']:.4f}")
+st.write(f"Precision: {evaluation_results['precision']:.4f}")
+st.write(f"Recall: {evaluation_results['recall']:.4f}")
+st.write(f"F1 Score: {evaluation_results['f1']:.4f}")
 
 # Display confusion matrix
-st.subheader("Confusion Matrix")
-class_names = [str(i) for i in range(26)]  # Assuming 26 classes (one per folder)
-plot_confusion_matrix(results["confusion_matrix"], class_names)
+plot_confusion_matrix(evaluation_results['confusion_matrix'], class_names=[str(i) for i in range(26)])
