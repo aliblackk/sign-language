@@ -35,10 +35,6 @@ def extract_zip(uploaded_file):
         extracted_files = os.listdir(persistent_dir)
         
         # Display the result in Streamlit
-        if len(extracted_files) > 0:
-            st.write(f"Successfully extracted the following files: {extracted_files}")
-        else:
-            st.write("No files found in the extracted folder. Please check the ZIP file content.")
         
         return persistent_dir
 # Custom dataset to load images from extracted folder structure
@@ -184,6 +180,11 @@ download_test_dataset(test_url, test_filename)
 # Extract ZIP file contents
 temp_dir = extract_zip(test_filename)
 st.write(f"Files extracted to: {temp_dir}")
+
+if len(extracted_files) > 0:
+    st.write(f"Successfully extracted the following files: {extracted_files}")
+else:
+    st.write("No files found in the extracted folder. Please check the ZIP file content.")
 
 # Define transformations for the dataset (no resizing needed, images are 224x224)
 transform = transforms.Compose([
