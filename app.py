@@ -21,15 +21,23 @@ def download_test_dataset(test_url, test_filename):
     else:
         st.write(f"Test dataset file {test_filename} already exists.")
 
-# Function to extract the ZIP file (test dataset)
 def extract_zip(uploaded_file):
     # Create a temporary directory to extract the contents of the zip file
     with tempfile.TemporaryDirectory() as tmpdirname:
         with zipfile.ZipFile(uploaded_file, 'r') as zip_ref:
             zip_ref.extractall(tmpdirname)
+        
         # Use a local directory to store the extracted contents
         persistent_dir = "./extracted_images"  # Directory in the current working directory
         shutil.move(tmpdirname, persistent_dir)  # Move the extracted content to a permanent location
+
+        # Check if files are present in the extracted directory
+        extracted_files = os.listdir(persistent_dir)
+        if len(extracted_files) > 0:
+            print(f"Successfully extracted the following files: {extracted_files}")
+        else:
+            print("No files found in the extracted folder. Please check the ZIP file content.")
+        
         return persistent_dir
 
 # Custom dataset to load images from extracted folder structure
