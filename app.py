@@ -5,6 +5,7 @@ from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms
 from PIL import Image
 import io
+import os
 import streamlit as st
 
 # Function to download the model from Google Drive
