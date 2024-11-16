@@ -187,9 +187,10 @@ transform = transforms.Compose([
     transforms.ToTensor(),
 ])
 
-# Create the dataset and DataLoader
-dataset = ImageFolderDataset(root_dir=temp_dir, transform=transform)
+dataset_dir = os.path.join(temp_dir, 'test')  # Assuming 'test' is the subfolder name
 
+dataset = ImageFolderDataset(root_dir=dataset_dir, transform=transform)
+# Create the dataset and DataLoader
 # Display the length of the test dataset
 dataset_length = len(dataset)
 st.write(f"Test dataset contains {dataset_length} images.")
