@@ -43,12 +43,14 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import confusion_matrix, precision_score, recall_score, f1_score
 import numpy as np
-from torch.utils.data import DataLoader
-from torchvision.transforms import transforms
+from torch.utils.data import Dataset, DataLoader
+from torchvision import transforms
 from PIL import Image
 import torch.nn as nn
-import gdown
+import zipfile
 import os
+import tempfile
+import shutil
 
 # Function to download the model from Google Drive
 def download_model(model_url, model_filename):
@@ -113,6 +115,45 @@ def evaluate_model(model, loader):
         "confusion_matrix": cm,
     }
 
+# Custom dataset to load images from extracted folder structure
+class ImageFolderDataset(Dataset):
+    def __init__(self, root_dir, transform=None):
+        self.root_dir = root_dir
+        self.transform = transform
+        self.image_paths = []
+        self.labels = []
+        
+        # Iterate through the folders and collect images and their labels
+        for label, folder in enumerate(os.listdir(root_dir)):
+            folder_path = os.path.join(root_dir, folder)
+            if os.path.isdir(folder_path):
+                for image_name in os.listdir(folder_path):
+                    image_path = os.path.join(folder_path, image_name)
+                    if image_path.lower().endswith(('.png', '.jpg', '.jpeg')):
+                        self.image_paths.append(image_path)
+                        self.labels.append(label)
+        
+    def __len__(self):
+        return len(self.image_paths)
+
+    def __getitem__(self, idx):
+        image_path = self.image_paths[idx]
+        label = self.labels[idx]
+        
+        # Open and transform the image
+        image = Image.open(image_path).convert('RGB')
+        if self.transform:
+            image = self.transform(image)
+        
+        return image, label
+
+# Function to extract .zip file
+def extract_zip(uploaded_file):
+    with tempfile.TemporaryDirectory() as tmpdirname:
+        with zipfile.ZipFile(uploaded_file, 'r') as zip_ref:
+            zip_ref.extractall(tmpdirname)
+        return tmpdirname
+
 # Streamlit app
 st.title("Sign Language Model Evaluation")
 
@@ -124,12 +165,21 @@ model_filename = "final_trained_model.pth"
 download_model(model_url, model_filename)
 
 # Sidebar for file upload
-uploaded_file = st.sidebar.file_uploader("Upload Test Dataset", type=["pt"])
+uploaded_file = st.sidebar.file_uploader("Upload Test Dataset (ZIP)", type=["zip"])
 
 if uploaded_file is not None:
-    # Load uploaded dataset
-    test_dataset = torch.load(uploaded_file)
-    test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False)  # Adjust batch size as needed
+    # Extract ZIP file contents
+    temp_dir = extract_zip(uploaded_file)
+    st.write(f"Files extracted to: {temp_dir}")
+    
+    # Define transformations for the dataset (no resizing needed, images are 224x224)
+    transform = transforms.Compose([
+        transforms.ToTensor(),
+    ])
+    
+    # Create the dataset and DataLoader
+    dataset = ImageFolderDataset(root_dir=temp_dir, transform=transform)
+    test_loader = DataLoader(dataset, batch_size=32, shuffle=False)  # Adjust batch size as needed
 
     # Load model
     model = load_model()
@@ -149,7 +199,7 @@ if uploaded_file is not None:
 
     # Display confusion matrix
     st.subheader("Confusion Matrix")
-    class_names = [str(i) for i in range(results["confusion_matrix"].shape[0])]
+    class_names = [str(i) for i in range(26)]  # Assuming 26 classes (one per folder)
     plot_confusion_matrix(results["confusion_matrix"], class_names)
 
     # Option to test individual images
@@ -161,10 +211,6 @@ if uploaded_file is not None:
         st.image(image, caption="Uploaded Image", use_column_width=True)
 
         # Preprocess image
-        transform = transforms.Compose([
-            transforms.Resize((128, 128)),  # Adjust to your input size
-            transforms.ToTensor(),
-        ])
         image_tensor = transform(image).unsqueeze(0).to(device)
 
         # Predict
