@@ -147,7 +147,8 @@ def evaluate_model(model, loader):
             all_labels.extend(target.cpu().numpy())
             all_preds.extend(predicted.cpu().numpy())
 
-    accuracy = correct_preds / total_preds
+    # Avoid division by zero
+    accuracy = correct_preds / total_preds if total_preds > 0 else 0.0
     precision = precision_score(all_labels, all_preds, average='weighted', zero_division=0)
     recall = recall_score(all_labels, all_preds, average='weighted', zero_division=0)
     f1 = f1_score(all_labels, all_preds, average='weighted', zero_division=0)
