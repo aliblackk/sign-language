@@ -1,17 +1,14 @@
+import os
 import gdown
 import torch
 import torch.nn as nn
-from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms
 from PIL import Image
-import io
-import os
 import streamlit as st
 
 # Function to download the model from Google Drive
 def download_model(model_url, model_filename):
-    if not os.path.exists(model_filename):
-        # Download the model from Google Drive
+    if not os.path.exists(model_filename):  # Check if the file exists
         gdown.download(model_url, model_filename, quiet=False)
     else:
         print(f"Model file {model_filename} already exists.")
@@ -27,19 +24,12 @@ class CustomCNN(nn.Module):
         self.fc1 = nn.Linear(256 * 28 * 28, 512)  # Adjust the size based on your image input
         self.fc2 = nn.Linear(512, 26)  # Output layer for 26 classes (alphabet)
         
-        # New layers added between fc1 and fc2
-        self.relu = nn.ReLU()
-        self.dropout = nn.Dropout(0.2)
-        self.batch_norm = nn.BatchNorm1d(512)
-    
     def forward(self, x):
         x = self.pool(nn.ReLU()(self.conv1(x)))
         x = self.pool(nn.ReLU()(self.conv2(x)))
         x = self.pool(nn.ReLU()(self.conv3(x)))
         x = x.view(-1, 256 * 28 * 28)  # Flatten the output for the fully connected layer
-        x = self.relu(self.fc1(x))  # Apply ReLU activation on fc1 output
-        x = self.batch_norm(x)  # Apply BatchNorm after fc1
-        x = self.dropout(x)  # Apply Dropout
+        x = self.fc1(x)
         x = self.fc2(x)  # Final output layer
         return x
 
@@ -70,7 +60,8 @@ if uploaded_file is not None:
     # Define image transformation (resize to match model input size)
     transform = transforms.Compose([
         transforms.Resize((224, 224)),  # Resize the image to match the model input size
-        transforms.ToTensor(),  # Convert image to tensor
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])  # Convert image to tensor
     ])
 
     # Load the pre-trained model
@@ -88,4 +79,8 @@ if uploaded_file is not None:
     # Predict the character in the image
     with st.spinner('Classifying image...'):
         predicted_class = predict_image(image, model, transform, device)
-        st.write(f"Predicted character: {chr(predicted_class + ord('A'))}")
+        
+        # Map predicted class index to corresponding character
+        class_names = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"  # Mapping of indices to characters
+        predicted_char = class_names[predicted_class]
+        st.write(f"Predicted character: {predicted_char}")
