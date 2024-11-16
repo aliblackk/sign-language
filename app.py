@@ -8,10 +8,10 @@ import torch.nn as nn
 from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms
 from PIL import Image
-import streamlit as st
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import confusion_matrix, precision_score, recall_score, f1_score
+import streamlit as st
 
 # Function to download the test dataset from Google Drive
 def download_test_dataset(test_url, test_filename):
@@ -19,7 +19,7 @@ def download_test_dataset(test_url, test_filename):
         # Download the test dataset from Google Drive
         gdown.download(test_url, test_filename, quiet=False)
     else:
-        st.write(f"Test dataset file {test_filename} already exists.")
+        print(f"Test dataset file {test_filename} already exists.")
 
 def extract_zip(uploaded_file):
     # Create a temporary directory to extract the contents of the zip file
@@ -28,14 +28,14 @@ def extract_zip(uploaded_file):
             zip_ref.extractall(tmpdirname)
         
         # Use a local directory to store the extracted contents
-        persistent_dir = "./extracted_images"  # Directory in the current working directory
+        persistent_dir = "./extracted_images2"  # Directory in the current working directory
         shutil.move(tmpdirname, persistent_dir)  # Move the extracted content to a permanent location
 
         # Check if files are present in the extracted directory
         extracted_files = os.listdir(persistent_dir)
         
-        # Display the result in Streamlit
-        return persistent_dir  # return the correct directory
+        # Return the correct directory
+        return persistent_dir  
 
 # Custom dataset to load images from extracted folder structure
 class ImageFolderDataset(Dataset):
@@ -49,12 +49,13 @@ class ImageFolderDataset(Dataset):
         for label, folder in enumerate(os.listdir(root_dir)):
             folder_path = os.path.join(root_dir, folder)
             if os.path.isdir(folder_path):
-                for image_name in os.listdir(folder_path):
+                image_files = [f for f in os.listdir(folder_path) if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
+                print(f"Found {len(image_files)} images in folder {folder}")
+                for image_name in image_files:
                     image_path = os.path.join(folder_path, image_name)
-                    if image_path.lower().endswith(('.png', '.jpg', '.jpeg')):
-                        self.image_paths.append(image_path)
-                        self.labels.append(label)
-        
+                    self.image_paths.append(image_path)
+                    self.labels.append(label)
+
     def __len__(self):
         return len(self.image_paths)
 
@@ -69,13 +70,14 @@ class ImageFolderDataset(Dataset):
         
         return image, label
 
+
 # Function to download the model from Google Drive
 def download_model(model_url, model_filename):
     if not os.path.exists(model_filename):
         # Download the model from Google Drive
         gdown.download(model_url, model_filename, quiet=False)
     else:
-        st.write(f"Model file {model_filename} already exists.")
+        print(f"Model file {model_filename} already exists.")
 
 # Custom CNN model definition
 class CustomCNN(nn.Module):
@@ -107,7 +109,7 @@ class CustomCNN(nn.Module):
 # Load trained model
 def load_model():
     model = CustomCNN()  # Replace with your model class
-    model.load_state_dict(torch.load("final_trained_model.pth", map_location=torch.device("cpu"), weights_only=True))
+    model.load_state_dict(torch.load("final_trained_model.pth", map_location=torch.device("cpu")))
     model.eval()
     return model
 
@@ -160,58 +162,47 @@ def evaluate_model(model, loader, device):
         "confusion_matrix": cm,
     }
 
-# Streamlit app
-st.title("Sign Language Model Evaluation")
+# Streamlit UI
+st.title("Image Classification Model Evaluation")
 
-# Google Drive model URL
-model_url = "https://drive.google.com/uc?id=1WKaRuJzaHfaybAM6ggr11q1RBYk2z8ef"  # Direct link for downloading
-model_filename = "final_trained_model.pth"
+# Upload zip file containing the test dataset
+uploaded_file = st.file_uploader("Upload Test Dataset", type=["zip"])
 
-# Download the model from Google Drive
-download_model(model_url, model_filename)
+if uploaded_file is not None:
+    # Extract the dataset
+    temp_dir = extract_zip(uploaded_file)
+    st.write(f"Files extracted to: {temp_dir}")
 
-# URL of the test dataset on Google Drive
-test_url = "https://drive.google.com/uc?id=1mFZ4VUHTdzzmd4zdO5TeiiWEStfK0FAD"  # Replace with the actual URL
-test_filename = "test.zip"
+    # Define transformations for the dataset
+    transform = transforms.Compose([
+        transforms.Resize((224, 224)),  # Resize images if necessary
+        transforms.ToTensor(),
+    ])
 
-# Download the test dataset
-download_test_dataset(test_url, test_filename)
+    dataset_dir = os.path.join(temp_dir, 'test')  # Assuming 'test' is the subfolder name
+    dataset = ImageFolderDataset(root_dir=dataset_dir, transform=transform)
+    st.write(f"Test dataset contains {len(dataset)} images.")
 
-# Extract ZIP file contents
-temp_dir = extract_zip(test_filename)
-st.write(f"Files extracted to: {temp_dir}")
+    test_loader = DataLoader(dataset, batch_size=32, shuffle=False)
 
-# Define transformations for the dataset
-transform = transforms.Compose([
-    transforms.Resize((224, 224)),  # Resize images if necessary
-    transforms.ToTensor(),
-])
+    # Load the model
+    model_url = "https://drive.google.com/uc?id=1WKaRuJzaHfaybAM6ggr11q1RBYk2z8ef"  # Direct link for downloading
+    model_filename = "final_trained_model.pth"
+    download_model(model_url, model_filename)
 
-dataset_dir = os.path.join(temp_dir, 'test')  # Assuming 'test' is the subfolder name
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model = load_model()
+    model.to(device)
 
-dataset = ImageFolderDataset(root_dir=dataset_dir, transform=transform)
-# Create the dataset and DataLoader
-# Display the length of the test dataset
-dataset_length = len(dataset)
-st.write(f"Test dataset contains {dataset_length} images.")
+    # Evaluate the model
+    evaluation_results = evaluate_model(model, test_loader, device)
 
-test_loader = DataLoader(dataset, batch_size=32, shuffle=False)  # Adjust batch size as needed
+    # Display evaluation results
+    st.write(f"Loss: {evaluation_results['loss']:.4f}")
+    st.write(f"Accuracy: {evaluation_results['accuracy']:.4f}")
+    st.write(f"Precision: {evaluation_results['precision']:.4f}")
+    st.write(f"Recall: {evaluation_results['recall']:.4f}")
+    st.write(f"F1 Score: {evaluation_results['f1']:.4f}")
 
-# Load model
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model = load_model()
-model.to(device)
-
-# Evaluate the model
-evaluation_results = evaluate_model(model, test_loader, device)
-
-# Display evaluation results in Streamlit
-st.write("Model Evaluation Results:")
-st.write(f"Loss: {evaluation_results['loss']:.4f}")
-st.write(f"Accuracy: {evaluation_results['accuracy']:.4f}")
-st.write(f"Precision: {evaluation_results['precision']:.4f}")
-st.write(f"Recall: {evaluation_results['recall']:.4f}")
-st.write(f"F1 Score: {evaluation_results['f1']:.4f}")
-
-# Display confusion matrix
-plot_confusion_matrix(evaluation_results['confusion_matrix'], class_names=[str(i) for i in range(26)])
+    # Display confusion matrix
+    plot_confusion_matrix(evaluation_results['confusion_matrix'], class_names=[str(i) for i in range(26)])
