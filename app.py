@@ -181,6 +181,8 @@ download_test_dataset(test_url, test_filename)
 temp_dir = extract_zip(test_filename)
 st.write(f"Files extracted to: {temp_dir}")
 
+extracted_files = os.listdir(persistent_dir)
+
 if len(extracted_files) > 0:
     st.write(f"Successfully extracted the following files: {extracted_files}")
 else:
