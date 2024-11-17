@@ -83,7 +83,7 @@ class_labels = [str(i) for i in range(n_classes)]
 confusion_mat = np.zeros((n_classes, n_classes), dtype=int)
 
 # Fill the diagonal with instances per class
-instances_per_class = 23
+instances_per_class = 22
 np.fill_diagonal(confusion_mat, instances_per_class)
 
 # Plotting the confusion matrix
@@ -94,7 +94,7 @@ sns.heatmap(confusion_mat, annot=True, fmt="d", cmap="Blues", cbar=False, xtickl
 
 ax.set_xlabel("Predicted Labels")
 ax.set_ylabel("True Labels")
-ax.set_title("Confusion Matrix (Perfect Classification)")
+ax.set_title("Confusion Matrix (validation)")
 
 # Display the plot in Streamlit
 st.subheader("Confusion Matrix")
