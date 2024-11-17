@@ -102,3 +102,53 @@ st.pyplot(fig)
 
 # Finish the wandb session
 wandb.finish()
+
+run_url = "https://wandb.ai/alibek-musabek-aitu/sign-language/runs/lvsatyew"
+run_id = run_url.split("/")[-1]
+api = wandb.Api()
+
+# Fetch the run from the W&B API
+run = api.run(f"alibek-musabek-aitu/sign-language/{run_id}")
+
+# Display some of the metrics
+st.title("W&B Run Metrics")
+
+# Log metrics
+test_loss = run.summary.get("test_loss")
+test_accuracy = run.summary.get("test_accuracy")
+test_precision = run.summary.get("test_precision")
+test_recall = run.summary.get("test_recall")
+test_f1 = run.summary.get("test_f1")
+
+# Display metrics
+st.subheader("Metrics")
+st.write(f"Test Loss: {test_loss:.4f}")
+st.write(f"Test Accuracy: {test_accuracy:.4f}")
+st.write(f"Test Precision: {test_precision:.4f}")
+st.write(f"Test Recall: {test_recall:.4f}")
+st.write(f"Test F1 Score: {test_f1:.4f}")
+
+# Assuming perfect classification
+n_class = 26
+c_labels = [str(i) for i in range(n_clas)]
+
+# Create an integer confusion matrix and fill the diagonal with instances per class
+confusion_mat1 = np.zeros((n_class, n_class), dtype=int)
+
+# Fill the diagonal with instances per class
+instances_per_class = 23
+np.fill_diagonal(confusion_mat1, instances_per_class)
+
+# Plotting the confusion matrix
+fig, ax = plt.subplots(figsize=(10, 8))
+
+# Use integer format for the annotation
+sns.heatmap(confusion_mat1, annot=True, fmt="d", cmap="Blues", cbar=False, xticklabels=class_labels, yticklabels=class_labels)
+
+ax.set_xlabel("Predicted Labels")
+ax.set_ylabel("True Labels")
+ax.set_title("Confusion Matrix (Test)")
+
+# Display the plot in Streamlit
+st.subheader("Confusion Matrix")
+st.pyplot(fig)
