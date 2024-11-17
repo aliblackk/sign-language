@@ -4,10 +4,8 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 import seaborn as sns
-import os
 from sklearn.metrics import precision_score, recall_score, f1_score, confusion_matrix
-from PIL import Image
-import io  
+
 # Authenticate with Wandb
 wandb.login(key='e6bbb13bc6a48abd9cddaf89523b51f76fe4dbd1')
 
@@ -33,7 +31,9 @@ st.write(f"Epochs: {run.config['epochs']}")
 st.write(f"Model Architecture: {run.config['architecture']}")
 
 # Fetch the metrics (loss, accuracy, precision, recall, etc.)
-history = run.history(keys=["train_loss", "train_accuracy", "val_loss", "val_accuracy", "train_precision", "train_recall", "train_f1", "val_precision", "val_recall", "val_f1"])
+history = run.history(keys=["train_loss", "train_accuracy", "val_loss", "val_accuracy", 
+                            "train_precision", "train_recall", "train_f1", "val_precision", 
+                            "val_recall", "val_f1"])
 
 # Display the metrics in a plot
 st.subheader("Training and Validation Metrics")
@@ -75,12 +75,12 @@ st.write("**Validation Precision:**", metrics["val_precision"].iloc[-1])
 st.write("**Validation Recall:**", metrics["val_recall"].iloc[-1])
 st.write("**Validation F1 Score:**", metrics["val_f1"].iloc[-1])
 
+# Assuming perfect classification
 n_classes = 26
 class_labels = [str(i) for i in range(n_classes)]
 confusion_mat = np.zeros((n_classes, n_classes))
 
-# Since the precision, recall, and F1 score are all 1, the model is perfect, so the confusion matrix will be diagonal
-# Let's assume there are 23 instances for each class (as indicated in your support column)
+# Fill the diagonal with instances per class
 instances_per_class = 23
 np.fill_diagonal(confusion_mat, instances_per_class)
 
@@ -93,7 +93,7 @@ ax.set_ylabel("True Labels")
 ax.set_title("Confusion Matrix (Perfect Classification)")
 
 # Display the plot in Streamlit
-st.title("Confusion Matrix")
+st.subheader("Confusion Matrix")
 st.pyplot(fig)
 
 # Finish the wandb session
