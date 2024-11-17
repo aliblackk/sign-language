@@ -75,7 +75,6 @@ st.write("**Validation Precision:**", metrics["val_precision"].iloc[-1])
 st.write("**Validation Recall:**", metrics["val_recall"].iloc[-1])
 st.write("**Validation F1 Score:**", metrics["val_f1"].iloc[-1])
 
-# Assuming 26 classes and perfect classification
 n_classes = 26
 class_labels = [str(i) for i in range(n_classes)]
 confusion_mat = np.zeros((n_classes, n_classes))
@@ -93,7 +92,9 @@ ax.set_xlabel("Predicted Labels")
 ax.set_ylabel("True Labels")
 ax.set_title("Confusion Matrix (Perfect Classification)")
 
-plt.show()
+# Display the plot in Streamlit
+st.title("Confusion Matrix")
+st.pyplot(fig)
 
 # Finish the wandb session
 wandb.finish()
