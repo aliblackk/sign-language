@@ -79,7 +79,7 @@ st.write("**Validation F1 Score:**", metrics["val_f1"].iloc[-1])
 st.subheader("Confusion Matrix")
 
 # Get all the files uploaded in this run
-confusion_matrix_images = run.files  # Corrected, no parentheses
+confusion_matrix_images = run.files()  # Corrected: call the method to get the files
 
 # Create a specific folder if it doesn't exist
 output_folder = './media/images/'
