@@ -33,8 +33,6 @@ history = run.history(keys=["train_loss", "train_accuracy", "val_loss", "val_acc
                             "val_recall", "val_f1"])
 
 metrics1 = run1.history(keys=["test_loss", "test_accuracy", "test_precision", "test_recall", "test_f1"])
-st.write("Metrics1 Data", metrics1)
-
 
 st.subheader("Training and Validation Metrics")
 metrics = history.dropna(subset=["train_loss", "val_loss"])
