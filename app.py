@@ -74,12 +74,25 @@ st.write("**Validation Precision:**", metrics["val_precision"].iloc[-1])
 st.write("**Validation Recall:**", metrics["val_recall"].iloc[-1])
 st.write("**Validation F1 Score:**", metrics["val_f1"].iloc[-1])
 
-image_path = run.files["media_images_confusion_matrix_9_ec6724a30b7eb84cf9e8"].download()
+# Display confusion matrices
+st.subheader("Confusion Matrix")
 
-# Open the image using PIL
-image = Image.open(image_path)
+# Get all the files uploaded in this run
+confusion_matrix_images = run.files  # Corrected, no parentheses
 
-# Display the image in Streamlit
-st.image(image, caption="Confusion Matrix", use_column_width=True)
+# Iterate through the files to find confusion matrix image
+for file in confusion_matrix_images:
+    # Check for a file name that matches the confusion matrix image
+    if "confusion_matrix" in file.name:
+        # Download the image
+        image_path = file.download()
+
+        # Open the image using PIL
+        image = Image.open(image_path)
+
+        # Display the image in Streamlit
+        st.image(image, caption="Confusion Matrix", use_column_width=True)
+
+
 # Finish the wandb session
 wandb.finish()
