@@ -71,7 +71,7 @@ confusion_matrix_images = run.files()  # Get all the files uploaded in the run
 for file in confusion_matrix_images:
     if "confusion_matrix" in file.name and file.name.endswith('.png'):
         # Download the image as binary data and open it using PIL
-        img_data = file.download(replace=true)  # Download the image file as binary data
+        img_data = file.download(replace=True)  # Download the image file as binary data
         img = Image.open(io.BytesIO(img_data))  # Open the image from the binary data using BytesIO
         st.image(img, caption=f"Confusion Matrix - Epoch {file.name.split('_')[-1].split('.')[0]}")
 
