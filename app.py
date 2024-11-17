@@ -55,7 +55,7 @@ def download_and_extract_data():
             zip_ref.extractall("./data_split")
         
         st.write("Dataset downloaded and extracted successfully!")
-        return "data_split"
+        return "./data_split"
     except Exception as e:
         st.error(f"Failed to download dataset: {e}")
         return None
@@ -67,6 +67,10 @@ st.title("Model Training and Testing")
 data_dir = download_and_extract_data()
 
 if data_dir:
+    # Check if there is a nested data_split folder after extraction and adjust paths accordingly
+    if os.path.exists(os.path.join(data_dir, "data_split")):
+        data_dir = os.path.join(data_dir, "data_split")
+    
     # Set paths to train, validation, and test datasets
     train_dir = os.path.join(data_dir, "train")
     val_dir = os.path.join(data_dir, "validation")
