@@ -7,8 +7,8 @@ import seaborn as sns
 from sklearn.metrics import precision_score, recall_score, f1_score, confusion_matrix
 from PIL import Image
 import io  
-
-wandb.login(key='e6bbb13bc6a48abd9cddaf89523b51f76fe4dbd1')
+# Authenticate with Wandb
+wandb.login()
 
 # Initialize wandb for retrieving the specific run's data
 wandb.init(project="sign-language", anonymous="allow")
@@ -80,19 +80,22 @@ st.subheader("Confusion Matrix")
 # Get all the files uploaded in this run
 confusion_matrix_images = run.files  # Corrected, no parentheses
 
+# Create a specific folder if it doesn't exist
+output_folder = './media/images/'
+os.makedirs(output_folder, exist_ok=True)
+
 # Iterate through the files to find confusion matrix image
 for file in confusion_matrix_images:
-    # Check for a file name that matches the confusion matrix image
-    if "confusion_matrix" in file.name:
-        # Download the image
-        image_path = file.download()
+    # Check for a file name that matches the confusion matrix image (for example, ending with .png or .jpg)
+    if "confusion_matrix" in file.name.lower() and (file.name.endswith('.png') or file.name.endswith('.jpg')):
+        # Download the image to the specified folder
+        image_path = file.download(root=output_folder)
 
-        # Open the image using PIL
+        # Open the image using PIL after download
         image = Image.open(image_path)
 
         # Display the image in Streamlit
         st.image(image, caption="Confusion Matrix", use_column_width=True)
-
 
 # Finish the wandb session
 wandb.finish()
