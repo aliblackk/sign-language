@@ -23,7 +23,7 @@ for epoch in range(epochs):
     wandb.log({"acc": acc, "loss": loss, "precision": precision, "recall": recall, "f1": f1})
 
 # After the training loop, you can retrieve the run data
-run = wandb.Api().run("alibek-musabek-aitu/sign-language/balmy-moon-1")
+run = wandb.Api().run("alibek-musabek-aitu/sign-language/runs/lvsatyew")
 
 # Fetching all the metrics (acc, loss, precision, recall, f1)
 history = run.history()
