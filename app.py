@@ -122,7 +122,7 @@ st.write(f"Test F1 Score: {test_f1:.4f}")
 
 # Assuming perfect classification
 n_class = 26
-c_labels = [str(i) for i in range(n_clas)]
+c_labels = [str(i) for i in range(n_class)]
 
 # Create an integer confusion matrix and fill the diagonal with instances per class
 confusion_mat1 = np.zeros((n_class, n_class), dtype=int)
