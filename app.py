@@ -86,7 +86,9 @@ np.fill_diagonal(confusion_mat, instances_per_class)
 
 # Plotting the confusion matrix
 fig, ax = plt.subplots(figsize=(10, 8))
-sns.heatmap(confusion_mat, annot=True, fmt=".2f", cmap="Blues", cbar=False, xticklabels=class_labels, yticklabels=class_labels)
+
+# Use integer format for the annotation
+sns.heatmap(confusion_mat, annot=True, fmt="d", cmap="Blues", cbar=False, xticklabels=class_labels, yticklabels=class_labels)
 
 ax.set_xlabel("Predicted Labels")
 ax.set_ylabel("True Labels")
@@ -95,6 +97,7 @@ ax.set_title("Confusion Matrix (Perfect Classification)")
 # Display the plot in Streamlit
 st.subheader("Confusion Matrix")
 st.pyplot(fig)
+
 
 
 # Finish the wandb session
