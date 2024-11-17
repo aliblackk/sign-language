@@ -7,7 +7,6 @@ import seaborn as sns
 from sklearn.metrics import precision_score, recall_score, f1_score, confusion_matrix
 from PIL import Image
 import io  
-
 wandb.login(key='e6bbb13bc6a48abd9cddaf89523b51f76fe4dbd1')
 
 # Initialize wandb for retrieving the specific run's data
@@ -70,11 +69,14 @@ st.subheader("Confusion Matrix")
 confusion_matrix_images = run.files()  # Get all the files uploaded in the run
 for file in confusion_matrix_images:
     if "confusion_matrix" in file.name and file.name.endswith('.png'):
-        # Download the image as binary data and open it using PIL
-        img_data = file.download(replace=True)  # Download the image file as binary data
-        img = Image.open(io.BytesIO(img_data))  # Open the image from the binary data using BytesIO
+        # Download the image as binary data
+        img_data = file.download()  # This will get the binary content of the file
+        
+        # Convert the binary data to an image
+        img = Image.open(io.BytesIO(img_data))  # Use BytesIO to convert binary data into an image
         st.image(img, caption=f"Confusion Matrix - Epoch {file.name.split('_')[-1].split('.')[0]}")
 
 # Finish the wandb session
 wandb.finish()
+
 
