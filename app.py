@@ -75,28 +75,11 @@ st.write("**Validation Precision:**", metrics["val_precision"].iloc[-1])
 st.write("**Validation Recall:**", metrics["val_recall"].iloc[-1])
 st.write("**Validation F1 Score:**", metrics["val_f1"].iloc[-1])
 
-# Display confusion matrices
+google_drive_image_url = "https://drive.google.com/uc?id=1Wwb2siBtQpZICLQn_7IWOwn3lYiYmkmg"
+
+# Display the image from Google Drive
 st.subheader("Confusion Matrix")
-
-# Get all the files uploaded in this run
-confusion_matrix_images = run.files()  # Corrected: call the method to get the files
-
-# Create a specific folder if it doesn't exist
-output_folder = './media/images/'
-os.makedirs(output_folder, exist_ok=True)
-
-# Iterate through the files to find confusion matrix image
-for file in confusion_matrix_images:
-    # Check for a file name that matches the confusion matrix image (for example, ending with .png or .jpg)
-    if "confusion_matrix" in file.name.lower() and (file.name.endswith('.png') or file.name.endswith('.jpg')):
-        # Download the image to the specified folder
-        image_path = file.download(root=output_folder)
-
-        # Open the image using PIL after download (Use the file directly)
-        image = Image.open(image_path)  # Open the image
-
-        # Display the image in Streamlit
-        st.image(image, caption="Confusion Matrix", use_column_width=True)
+st.image(google_drive_image_url, caption="Confusion Matrix", use_column_width=True)
 
 # Finish the wandb session
 wandb.finish()
