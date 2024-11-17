@@ -78,7 +78,9 @@ st.write("**Validation F1 Score:**", metrics["val_f1"].iloc[-1])
 # Assuming perfect classification
 n_classes = 26
 class_labels = [str(i) for i in range(n_classes)]
-confusion_mat = np.zeros((n_classes, n_classes))
+
+# Create an integer confusion matrix and fill the diagonal with instances per class
+confusion_mat = np.zeros((n_classes, n_classes), dtype=int)
 
 # Fill the diagonal with instances per class
 instances_per_class = 23
@@ -97,8 +99,6 @@ ax.set_title("Confusion Matrix (Perfect Classification)")
 # Display the plot in Streamlit
 st.subheader("Confusion Matrix")
 st.pyplot(fig)
-
-
 
 # Finish the wandb session
 wandb.finish()
