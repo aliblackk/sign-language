@@ -7,6 +7,7 @@ import seaborn as sns
 from sklearn.metrics import precision_score, recall_score, f1_score, confusion_matrix
 from PIL import Image
 import io  
+
 wandb.login(key='e6bbb13bc6a48abd9cddaf89523b51f76fe4dbd1')
 
 # Initialize wandb for retrieving the specific run's data
@@ -64,6 +65,15 @@ ax.set_ylabel("F1 Score")
 ax.legend()
 st.pyplot(fig)
 
+# Display precision and recall for both train and validation
+st.subheader("Precision and Recall")
+st.write("**Train Precision:**", metrics["train_precision"].iloc[-1])
+st.write("**Train Recall:**", metrics["train_recall"].iloc[-1])
+st.write("**Train F1 Score:**", metrics["train_f1"].iloc[-1])
+st.write("**Validation Precision:**", metrics["val_precision"].iloc[-1])
+st.write("**Validation Recall:**", metrics["val_recall"].iloc[-1])
+st.write("**Validation F1 Score:**", metrics["val_f1"].iloc[-1])
+
 # Display confusion matrices
 st.subheader("Confusion Matrix")
 confusion_matrix_images = run.files()  # Get all the files uploaded in the run
@@ -78,5 +88,3 @@ for file in confusion_matrix_images:
 
 # Finish the wandb session
 wandb.finish()
-
-
