@@ -91,12 +91,6 @@ st.pyplot(fig)
 
 st.title("W&B Run Metrics")
 
-test_loss = run1.summary.get("test_loss")
-test_accuracy = run1.summary.get("test_accuracy")
-test_precision = run1.summary.get("test_precision")
-test_recall = run1.summary.get("test_recall")
-test_f1 = run1.summary.get("test_f1")
-
 st.subheader("Metrics for Testing")
 st.write("**Test Loss:**", metrics1["test_loss"].iloc[-1])
 st.write("**Test Accuracy:**", metrics1["test_accuracy"].iloc[-1])
