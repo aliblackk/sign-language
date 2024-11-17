@@ -8,7 +8,7 @@ from sklearn.metrics import precision_score, recall_score, f1_score, confusion_m
 from PIL import Image
 import io  
 # Authenticate with Wandb
-wandb.login()
+wandb.login(key='e6bbb13bc6a48abd9cddaf89523b51f76fe4dbd1')
 
 # Initialize wandb for retrieving the specific run's data
 wandb.init(project="sign-language", anonymous="allow")
