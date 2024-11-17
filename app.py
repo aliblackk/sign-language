@@ -92,8 +92,8 @@ for file in confusion_matrix_images:
         # Download the image to the specified folder
         image_path = file.download(root=output_folder)
 
-        # Open the image using PIL after download
-        image = Image.open(image_path)
+        # Open the image using PIL after download (Use the file directly)
+        image = Image.open(image_path)  # Open the image
 
         # Display the image in Streamlit
         st.image(image, caption="Confusion Matrix", use_column_width=True)
