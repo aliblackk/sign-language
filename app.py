@@ -74,17 +74,12 @@ st.write("**Validation Precision:**", metrics["val_precision"].iloc[-1])
 st.write("**Validation Recall:**", metrics["val_recall"].iloc[-1])
 st.write("**Validation F1 Score:**", metrics["val_f1"].iloc[-1])
 
-# Display confusion matrices
-st.subheader("Confusion Matrix")
-confusion_matrix_images = run.files()  # Get all the files uploaded in the run
-for file in confusion_matrix_images:
-    if "confusion_matrix" in file.name and file.name.endswith('.png'):
-        # Download the image as binary data
-        img_data = file.download()  # This will get the binary content of the file
-        
-        # Convert the binary data to an image
-        img = Image.open(io.BytesIO(img_data))  # Use BytesIO to convert binary data into an image
-        st.image(img, caption=f"Confusion Matrix - Epoch {file.name.split('_')[-1].split('.')[0]}")
+image_path = run.files["media_images_confusion_matrix_9_ec6724a30b7eb84cf9e8"].download()
 
+# Open the image using PIL
+image = Image.open(image_path)
+
+# Display the image in Streamlit
+st.image(image, caption="Confusion Matrix", use_column_width=True)
 # Finish the wandb session
 wandb.finish()
