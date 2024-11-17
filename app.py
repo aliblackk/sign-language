@@ -14,8 +14,10 @@ wandb.init(project="sign-language", anonymous="allow")
 
 # Fetch the specific run using the run ID
 run_id = "lvsatyew"  # Replace this with your actual run ID
+run_id1 = "rkn3i44y"  # Replace this with your actual run ID
 api = wandb.Api()
 run = api.run(f"alibek-musabek-aitu/sign-language/{run_id}")  # Get the specific run by ID
+run1 = api.run(f"alibek-musabek-aitu/sign-language/{run_id1}")  # Get the specific run by ID
 
 # Display some basic information about the run
 st.title(f"Sign Language Model Training Results - {run.name}")
@@ -33,12 +35,11 @@ st.write(f"Model Architecture: {run.config['architecture']}")
 # Fetch the metrics (loss, accuracy, precision, recall, etc.)
 history = run.history(keys=["train_loss", "train_accuracy", "val_loss", "val_accuracy", 
                             "train_precision", "train_recall", "train_f1", "val_precision", 
-                            "val_recall", "val_f1", "test_loss", "test_accuracy", 
-                            "test_precision", "test_recall", "test_f1"])
+                            "val_recall", "val_f1"])
 
 # Display the metrics in a plot
 st.subheader("Training and Validation Metrics")
-metrics = history.dropna(subset=["train_loss", "val_loss", "test_loss"])
+metrics = history.dropna(subset=["train_loss", "val_loss"])
 
 # Plotting train and validation loss
 fig, ax = plt.subplots()
@@ -105,12 +106,19 @@ st.pyplot(fig)
 st.title("W&B Run Metrics")
 
 # Log metrics
-st.subheader("Test Metrics")
-st.write(f"Test Loss: {metrics['test_loss'].iloc[-1]:.4f}")
-st.write(f"Test Accuracy: {metrics['test_accuracy'].iloc[-1]:.4f}")
-st.write(f"Test Precision: {metrics['test_precision'].iloc[-1]:.4f}")
-st.write(f"Test Recall: {metrics['test_recall'].iloc[-1]:.4f}")
-st.write(f"Test F1 Score: {metrics['test_f1'].iloc[-1]:.4f}")
+test_loss = run1.summary.get("test_loss")
+test_accuracy = run1.summary.get("test_accuracy")
+test_precision = run1.summary.get("test_precision")
+test_recall = run1.summary.get("test_recall")
+test_f1 = run1.summary.get("test_f1")
+
+# Display metrics
+st.subheader("Metrics")
+st.write(f"Test Loss: {test_loss:.4f}")
+st.write(f"Test Accuracy: {test_accuracy:.4f}")
+st.write(f"Test Precision: {test_precision:.4f}")
+st.write(f"Test Recall: {test_recall:.4f}")
+st.write(f"Test F1 Score: {test_f1:.4f}")
 
 # Assuming perfect classification
 n_class = 26
