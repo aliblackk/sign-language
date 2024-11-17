@@ -5,70 +5,71 @@ import pandas as pd
 import numpy as np
 import seaborn as sns
 from sklearn.metrics import precision_score, recall_score, f1_score, confusion_matrix
+from PIL import Image
 
 wandb.login(key='e6bbb13bc6a48abd9cddaf89523b51f76fe4dbd1')
 
-# Connect to your Wandb project
-wandb.init(project="sign-language", entity="alibek-musabek-aitu")
+# Initialize wandb for retrieving the latest run's data
+wandb.init(project="sign-language", anonymous="allow")
 
-# Simulate logging metrics in Wandb during training
-epochs = 10
-for epoch in range(epochs):
-    # Simulate metrics (replace with actual values from your model)
-    acc = 1 - 2 ** -epoch
-    loss = 2 ** -epoch
-    precision = 0.5 + 0.05 * epoch
-    recall = 0.5 + 0.05 * epoch
-    f1 = 2 * (precision * recall) / (precision + recall)  # Simple F1 calculation
-    wandb.log({"acc": acc, "loss": loss, "precision": precision, "recall": recall, "f1": f1})
+# Fetch the latest run (you can also specify a run ID if needed)
+api = wandb.Api()
+run = api.runs("sign-language")[0]  # Get the first run or adjust based on your needs
 
-# After the training loop, you can retrieve the run data
-run = wandb.Api().run("alibek-musabek-aitu/sign-language/runs/lvsatyew")
+# Display some basic information about the run
+st.title(f"Sign Language Model Training Results - {run.name}")
+st.write(f"Run ID: {run.id}")
+st.write(f"Created at: {run.created_at}")
 
-# Fetching all the metrics (acc, loss, precision, recall, f1)
-history = run.history()
-
-# Streamlit dashboard
-st.title('Model Training Metrics')
-st.write("Here are the metrics logged during the training process.")
-
-# Displaying the learning curve
-st.subheader("Learning Curve")
-
-# Plot Loss and Accuracy vs Epoch
-fig, ax = plt.subplots()
-ax.plot(history['acc'], label="Training Accuracy", color='blue')
-ax.plot(history['loss'], label="Training Loss", color='red')
-ax.set_xlabel('Epoch')
-ax.set_ylabel('Value')
-ax.set_title('Learning Curve')
-ax.legend()
-
-st.pyplot(fig)
-
-# Display Metrics in a table
-st.subheader("Training Metrics")
-st.dataframe(history[['acc', 'loss', 'precision', 'recall', 'f1']])
-
-# Fetch confusion matrix from Wandb
-# Simulating confusion matrix (replace with actual confusion matrix from your model)
-true_labels = np.random.randint(0, 3, 100)  # Simulated true labels
-pred_labels = np.random.randint(0, 3, 100)  # Simulated predicted labels
-
-cm = confusion_matrix(true_labels, pred_labels)
-
-# Plotting confusion matrix
-st.subheader("Confusion Matrix")
-fig_cm, ax_cm = plt.subplots(figsize=(8, 6))
-sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", xticklabels=np.arange(cm.shape[0]), yticklabels=np.arange(cm.shape[0]))
-ax_cm.set_xlabel("Predicted Labels")
-ax_cm.set_ylabel("True Labels")
-ax_cm.set_title("Confusion Matrix")
-
-st.pyplot(fig_cm)
-
-# You can also display other hyperparameters logged in wandb
-st.write(f"Hyperparameters used: ")
+# Display the training parameters used in this run
+st.subheader("Training Hyperparameters")
 st.write(f"Learning Rate: {run.config['learning_rate']}")
 st.write(f"Batch Size: {run.config['batch_size']}")
+st.write(f"Weight Decay: {run.config['weight_decay']}")
 st.write(f"Epochs: {run.config['epochs']}")
+st.write(f"Model Architecture: {run.config['architecture']}")
+
+# Fetch the metrics (loss, accuracy, precision, recall, etc.)
+history = run.history(keys=["train_loss", "train_accuracy", "val_loss", "val_accuracy", "train_precision", "train_recall", "train_f1", "val_precision", "val_recall", "val_f1"])
+
+# Display the metrics in a plot
+st.subheader("Training and Validation Metrics")
+metrics = history.dropna(subset=["train_loss", "val_loss"])
+
+# Plotting train and validation loss
+fig, ax = plt.subplots()
+ax.plot(metrics["train_loss"], label="Train Loss")
+ax.plot(metrics["val_loss"], label="Validation Loss")
+ax.set_xlabel("Epoch")
+ax.set_ylabel("Loss")
+ax.legend()
+st.pyplot(fig)
+
+# Plotting train and validation accuracy
+fig, ax = plt.subplots()
+ax.plot(metrics["train_accuracy"], label="Train Accuracy")
+ax.plot(metrics["val_accuracy"], label="Validation Accuracy")
+ax.set_xlabel("Epoch")
+ax.set_ylabel("Accuracy")
+ax.legend()
+st.pyplot(fig)
+
+# Plotting F1 score for both train and validation
+fig, ax = plt.subplots()
+ax.plot(metrics["train_f1"], label="Train F1 Score")
+ax.plot(metrics["val_f1"], label="Validation F1 Score")
+ax.set_xlabel("Epoch")
+ax.set_ylabel("F1 Score")
+ax.legend()
+st.pyplot(fig)
+
+# Display confusion matrices
+st.subheader("Confusion Matrix")
+confusion_matrix_images = run.files()  # Get all the images uploaded in the run
+for file in confusion_matrix_images:
+    if "confusion_matrix" in file.name:
+        img = Image.open(file.download())
+        st.image(img, caption=f"Confusion Matrix - Epoch {file.name.split('_')[-1].split('.')[0]}")
+
+# Finish the wandb session
+wandb.finish()
