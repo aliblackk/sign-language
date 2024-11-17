@@ -33,11 +33,12 @@ st.write(f"Model Architecture: {run.config['architecture']}")
 # Fetch the metrics (loss, accuracy, precision, recall, etc.)
 history = run.history(keys=["train_loss", "train_accuracy", "val_loss", "val_accuracy", 
                             "train_precision", "train_recall", "train_f1", "val_precision", 
-                            "val_recall", "val_f1"])
+                            "val_recall", "val_f1", "test_loss", "test_accuracy", 
+                            "test_precision", "test_recall", "test_f1"])
 
 # Display the metrics in a plot
 st.subheader("Training and Validation Metrics")
-metrics = history.dropna(subset=["train_loss", "val_loss"])
+metrics = history.dropna(subset=["train_loss", "val_loss", "test_loss"])
 
 # Plotting train and validation loss
 fig, ax = plt.subplots()
@@ -104,19 +105,12 @@ st.pyplot(fig)
 st.title("W&B Run Metrics")
 
 # Log metrics
-test_loss = run.summary.get("test_loss")
-test_accuracy = run.summary.get("test_accuracy")
-test_precision = run.summary.get("test_precision")
-test_recall = run.summary.get("test_recall")
-test_f1 = run.summary.get("test_f1")
-
-# Display metrics
-st.subheader("Metrics")
-st.write(f"Test Loss: {test_loss:.4f}")
-st.write(f"Test Accuracy: {test_accuracy:.4f}")
-st.write(f"Test Precision: {test_precision:.4f}")
-st.write(f"Test Recall: {test_recall:.4f}")
-st.write(f"Test F1 Score: {test_f1:.4f}")
+st.subheader("Test Metrics")
+st.write(f"Test Loss: {metrics['test_loss'].iloc[-1]:.4f}")
+st.write(f"Test Accuracy: {metrics['test_accuracy'].iloc[-1]:.4f}")
+st.write(f"Test Precision: {metrics['test_precision'].iloc[-1]:.4f}")
+st.write(f"Test Recall: {metrics['test_recall'].iloc[-1]:.4f}")
+st.write(f"Test F1 Score: {metrics['test_f1'].iloc[-1]:.4f}")
 
 # Assuming perfect classification
 n_class = 26
