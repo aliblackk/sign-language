@@ -100,16 +100,6 @@ ax.set_title("Confusion Matrix (validation)")
 st.subheader("Confusion Matrix")
 st.pyplot(fig)
 
-# Finish the wandb session
-wandb.finish()
-
-run_url = "https://wandb.ai/alibek-musabek-aitu/sign-language/runs/lvsatyew"
-run_id = run_url.split("/")[-1]
-api = wandb.Api()
-
-# Fetch the run from the W&B API
-run = api.run(f"alibek-musabek-aitu/sign-language/{run_id}")
-
 # Display some of the metrics
 st.title("W&B Run Metrics")
 
@@ -152,3 +142,5 @@ ax.set_title("Confusion Matrix (Test)")
 # Display the plot in Streamlit
 st.subheader("Confusion Matrix")
 st.pyplot(fig)
+
+wandb.finish()
