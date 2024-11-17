@@ -32,6 +32,9 @@ history = run.history(keys=["train_loss", "train_accuracy", "val_loss", "val_acc
                             "train_precision", "train_recall", "train_f1", "val_precision", 
                             "val_recall", "val_f1"])
 
+metrics1 = run.history(keys=["test_loss", "test_accuracy", "test_precision", "test_recall", 
+                            "test_f1"])
+
 st.subheader("Training and Validation Metrics")
 metrics = history.dropna(subset=["train_loss", "val_loss"])
 
@@ -97,11 +100,11 @@ test_f1 = run1.summary.get("test_f1")
 
 # Displaying the Test Metrics
 st.subheader("Metrics for Testing")
-st.write(f"**Test Loss:** {test_loss}")
-st.write(f"**Test Accuracy:** {test_accuracy}")
-st.write(f"**Test Precision:** {test_precision}")
-st.write(f"**Test Recall:** {test_recall}")
-st.write(f"**Test F1 Score:** {test_f1}")
+st.write("**Test Loss:**", metrics["test_loss"].iloc[-1])
+st.write("**Test Accuracy:**", metrics["test_accuracy"].iloc[-1])
+st.write("**Test Precision:**", metrics["test_precision"].iloc[-1])
+st.write("**Test Recall:**", metrics["test_recall"].iloc[-1])
+st.write("**Test F1 Score:**", metrics["test_f1"].iloc[-1])
 
 n_class = 26
 c_labels = [str(i) for i in range(n_class)]
