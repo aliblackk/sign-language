@@ -98,11 +98,11 @@ test_recall = run1.summary.get("test_recall")
 test_f1 = run1.summary.get("test_f1")
 
 st.subheader("Metrics for Testing")
-st.write("**Test Loss:**", metrics["test_loss"].iloc[-1])
-st.write("**Test Accuracy:**", metrics["test_accuracy"].iloc[-1])
-st.write("**Test Precision:**", metrics["test_precision"].iloc[-1])
-st.write("**Test Recall:**", metrics["test_recall"].iloc[-1])
-st.write("**Test F1 Score:**", metrics["test_f1"].iloc[-1])
+st.write("**Test Loss:**", metrics1["test_loss"].iloc[-1])
+st.write("**Test Accuracy:**", metrics1["test_accuracy"].iloc[-1])
+st.write("**Test Precision:**", metrics1["test_precision"].iloc[-1])
+st.write("**Test Recall:**", metrics1["test_recall"].iloc[-1])
+st.write("**Test F1 Score:**", metrics1["test_f1"].iloc[-1])
 
 n_class = 26
 c_labels = [str(i) for i in range(n_class)]
