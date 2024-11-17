@@ -9,12 +9,13 @@ from PIL import Image
 
 wandb.login(key='e6bbb13bc6a48abd9cddaf89523b51f76fe4dbd1')
 
-# Initialize wandb for retrieving the latest run's data
+# Initialize wandb for retrieving the specific run's data
 wandb.init(project="sign-language", anonymous="allow")
 
-# Fetch the latest run (you can also specify a run ID if needed)
+# Fetch the specific run using the run ID
+run_id = "lvsatyew"  # Replace this with your actual run ID
 api = wandb.Api()
-run = api.runs("sign-language")[0]  # Get the first run or adjust based on your needs
+run = api.run(f"alibek-musabek-aitu/sign-language/{run_id}")  # Get the specific run by ID
 
 # Display some basic information about the run
 st.title(f"Sign Language Model Training Results - {run.name}")
@@ -65,10 +66,11 @@ st.pyplot(fig)
 
 # Display confusion matrices
 st.subheader("Confusion Matrix")
-confusion_matrix_images = run.files()  # Get all the images uploaded in the run
+confusion_matrix_images = run.files()  # Get all the files uploaded in the run
 for file in confusion_matrix_images:
-    if "confusion_matrix" in file.name:
-        img = Image.open(file.download())
+    if "confusion_matrix" in file.name and file.name.endswith('.png'):
+        # Download the image and open it using PIL
+        img = Image.open(file.download())  # PIL automatically handles binary files
         st.image(img, caption=f"Confusion Matrix - Epoch {file.name.split('_')[-1].split('.')[0]}")
 
 # Finish the wandb session
