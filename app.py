@@ -52,7 +52,7 @@ def download_and_extract_data():
         # Unzip dataset
         st.write("Extracting dataset...")
         with zipfile.ZipFile(output_file, 'r') as zip_ref:
-            zip_ref.extractall("data_split")
+            zip_ref.extractall("./data_split")
         
         st.write("Dataset downloaded and extracted successfully!")
         return "data_split"
