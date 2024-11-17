@@ -88,18 +88,20 @@ st.pyplot(fig)
 
 st.title("W&B Run Metrics")
 
+# Assuming you have run1 which contains test metrics in the summary field.
 test_loss = run1.summary.get("test_loss")
 test_accuracy = run1.summary.get("test_accuracy")
 test_precision = run1.summary.get("test_precision")
 test_recall = run1.summary.get("test_recall")
 test_f1 = run1.summary.get("test_f1")
 
-st.subheader("Metrics for testing")
-st.write(f"**Test Loss:** {metrics['test_loss'].iloc[-1]}")
-st.write(f"**Test Accuracy:** {metrics['test_accuracy'].iloc[-1]}")
-st.write(f"**Test Precision:** {metrics['test_precision'].iloc[-1]}")
-st.write(f"**Test Recall:** {metrics['test_recall'].iloc[-1]}")
-st.write(f"**Test F1 Score:** {metrics['test_f1'].iloc[-1]}")
+# Displaying the Test Metrics
+st.subheader("Metrics for Testing")
+st.write(f"**Test Loss:** {test_loss}")
+st.write(f"**Test Accuracy:** {test_accuracy}")
+st.write(f"**Test Precision:** {test_precision}")
+st.write(f"**Test Recall:** {test_recall}")
+st.write(f"**Test F1 Score:** {test_f1}")
 
 n_class = 26
 c_labels = [str(i) for i in range(n_class)]
