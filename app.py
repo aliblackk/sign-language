@@ -6,21 +6,17 @@ import numpy as np
 import seaborn as sns
 from sklearn.metrics import precision_score, recall_score, f1_score, confusion_matrix
 
-# No need to log in with an API key for public projects
-wandb.init(project="sign-language", anonymous="allow")
+wandb.login(key='e6bbb13bc6a48abd9cddaf89523b51f76fe4dbd1')
 
-# Accessing public runs by specifying the project and run IDs
+wandb.init(project="sign-language", anonymous='must')
+
 run_id = "lvsatyew"  
 run_id1 = "rkn3i44y"  
 api = wandb.Api()
+run = api.run(f"alibek-musabek-aitu/sign-language/{run_id}")  
+run1 = api.run(f"alibek-musabek-aitu/sign-language/{run_id1}")  
 
-# Specify the public project path (username/project name)
-project_path = "alibek-musabek-aitu/sign-language"
 
-run = api.run(f"{project_path}/{run_id}")  
-run1 = api.run(f"{project_path}/{run_id1}")  
-
-# Remaining code stays the same
 st.title(f"Sign Language Model Training Results - {run.name}")
 st.write(f"Run ID: {run.id}")
 st.write(f"Created at: {run.created_at}")
@@ -117,7 +113,6 @@ ax.set_xlabel("Predicted Labels")
 ax.set_ylabel("True Labels")
 ax.set_title("Confusion Matrix (Test)")
 
-# Display the plot in Streamlit
 st.subheader("Confusion Matrix")
 st.pyplot(fig)
 
