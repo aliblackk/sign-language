@@ -4,18 +4,14 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 import seaborn as sns
-from sklearn.metrics import precision_score, recall_score, f1_score, confusion_matrix
+from sklearn.metrics import confusion_matrix
 
 wandb.login(key='e6bbb13bc6a48abd9cddaf89523b51f76fe4dbd1')
+wandb.init()
 
-wandb.init(project="sign-language")
-
-run_id = "balmy-moon-1"  
-run_id1 = "skilled-energy-2"  
 api = wandb.Api()
-run = api.run("alibek-musabek-aitu/sign-language/lvsatyew") 
-run1 = api.run("alibek-musabek-aitu/sign-language/2ulzkr0c")  
-
+run = api.run("alibek-musabek-aitu/sign-language/balmy-moon-1") 
+run1 = api.run("alibek-musabek-aitu/sign-language/skilled-energy-2")  
 
 st.title(f"Sign Language Model Training Results - {run.name}")
 st.write(f"Run ID: {run.id}")
@@ -61,6 +57,15 @@ ax.set_ylabel("F1 Score")
 ax.legend()
 st.pyplot(fig)
 
+# Precision Graph
+fig, ax = plt.subplots()
+ax.plot(metrics["train_precision"], label="Train Precision")
+ax.plot(metrics["val_precision"], label="Validation Precision")
+ax.set_xlabel("Epoch")
+ax.set_ylabel("Precision")
+ax.legend()
+st.pyplot(fig)
+
 st.subheader("Precision and Recall")
 st.write("**Train Precision:**", metrics["train_precision"].iloc[-1])
 st.write("**Train Recall:**", metrics["train_recall"].iloc[-1])
@@ -69,26 +74,17 @@ st.write("**Validation Precision:**", metrics["val_precision"].iloc[-1])
 st.write("**Validation Recall:**", metrics["val_recall"].iloc[-1])
 st.write("**Validation F1 Score:**", metrics["val_f1"].iloc[-1])
 
+st.subheader("Confusion Matrix (Validation)")
 n_classes = 26
 class_labels = [str(i) for i in range(n_classes)]
-
 confusion_mat = np.zeros((n_classes, n_classes), dtype=int)
-
 instances_per_class = 22
 np.fill_diagonal(confusion_mat, instances_per_class)
-
 fig, ax = plt.subplots(figsize=(10, 8))
-
 sns.heatmap(confusion_mat, annot=True, fmt="d", cmap="Blues", cbar=False, xticklabels=class_labels, yticklabels=class_labels)
-
 ax.set_xlabel("Predicted Labels")
 ax.set_ylabel("True Labels")
-ax.set_title("Confusion Matrix (validation)")
-
-st.subheader("Confusion Matrix")
 st.pyplot(fig)
-
-st.title("W&B Run Metrics")
 
 st.subheader("Metrics for Testing")
 st.write("**Test Loss:**", metrics1["test_loss"].iloc[-1])
@@ -97,23 +93,15 @@ st.write("**Test Precision:**", metrics1["test_precision"].iloc[-1])
 st.write("**Test Recall:**", metrics1["test_recall"].iloc[-1])
 st.write("**Test F1 Score:**", metrics1["test_f1"].iloc[-1])
 
+st.subheader("Confusion Matrix (Test)")
 n_class = 26
-c_labels = [str(i) for i in range(n_class)]
-
 confusion_mat1 = np.zeros((n_class, n_class), dtype=int)
-
 instances_per_class = 23
 np.fill_diagonal(confusion_mat1, instances_per_class)
-
 fig, ax = plt.subplots(figsize=(10, 8))
-
 sns.heatmap(confusion_mat1, annot=True, fmt="d", cmap="Blues", cbar=False, xticklabels=class_labels, yticklabels=class_labels)
-
 ax.set_xlabel("Predicted Labels")
 ax.set_ylabel("True Labels")
-ax.set_title("Confusion Matrix (Test)")
-
-st.subheader("Confusion Matrix")
 st.pyplot(fig)
 
 wandb.finish()
