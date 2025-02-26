@@ -8,7 +8,7 @@ from sklearn.metrics import precision_score, recall_score, f1_score, confusion_m
 
 wandb.login(key='e6bbb13bc6a48abd9cddaf89523b51f76fe4dbd1')
 
-wandb.init(project="sign-language", anonymous='must')
+wandb.init(project="sign-language")
 
 run_id = "balmy-moon-1"  
 run_id1 = "skilled-energy-2"  
