@@ -6,15 +6,15 @@ import numpy as np
 import seaborn as sns
 from sklearn.metrics import precision_score, recall_score, f1_score, confusion_matrix
 
-wandb.login(key='your_key')
+wandb.login(key='e6bbb13bc6a48abd9cddaf89523b51f76fe4dbd1')
 
-wandb.init(project="your_project", anonymous='must')
+wandb.init(project="sign-language", anonymous='must')
 
-run_id = "y1"  
-run_id1 = "y2"  
+run_id = "balmy-moon-1"  
+run_id1 = "skilled-energy-2"  
 api = wandb.Api()
-run = api.run(f"your_username/your_project/{run_id}")  
-run1 = api.run(f"your_username/your_project//{run_id1}")  
+run = api.run(f"alibek-musabek-aitu/sign-language/{run_id}")  
+run1 = api.run(f"alibek-musabek-aitu/sign-language/{run_id1}")  
 
 
 st.title(f"Sign Language Model Training Results - {run.name}")
