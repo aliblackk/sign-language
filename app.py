@@ -10,8 +10,8 @@ wandb.login(key='e6bbb13bc6a48abd9cddaf89523b51f76fe4dbd1')
 wandb.init()
 
 api = wandb.Api()
-run = api.run("alibek-musabek-aitu/sign-language/balmy-moon-1") 
-run1 = api.run("alibek-musabek-aitu/sign-language/skilled-energy-2")  
+run = api.run("alibek-musabek-aitu/sign-language/lvsatyew") 
+run1 = api.run("alibek-musabek-aitu/sign-language/rkn3i44y")  
 
 st.title(f"Sign Language Model Training Results - {run.name}")
 st.write(f"Run ID: {run.id}")
