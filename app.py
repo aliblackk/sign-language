@@ -13,8 +13,8 @@ wandb.init(project="sign-language")
 run_id = "balmy-moon-1"  
 run_id1 = "skilled-energy-2"  
 api = wandb.Api()
-run = api.run("alibek-musabek-aitu/sign-language/balmy-moon-1") 
-run1 = api.run("alibek-musabek-aitu/sign-language/skilled-energy-2")  
+run = api.run("alibek-musabek-aitu/sign-language/lvsatyew") 
+run1 = api.run("alibek-musabek-aitu/sign-language/2ulzkr0c")  
 
 
 st.title(f"Sign Language Model Training Results - {run.name}")
